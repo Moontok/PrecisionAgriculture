@@ -5,8 +5,7 @@ from mfrc522 import SimpleMFRC522
 from lcd1602 import LCD
 
 
-search_id = "270BD233"
-
+search_id = "270BD233" # Tag ID to search for
 
 rLED = m.Pin(16, m.Pin.OUT)
 gLED = m.Pin(17, m.Pin.OUT)
@@ -20,13 +19,14 @@ while True:
     tag_id, tag_name = reader.read()
     message = ""
 
+    lcd.clear()
     if tag_id == search_id:
         message = "Match: " + str(tag_name)
         gLED.value(1)
     else:
         message = "No Match: " + str(tag_name)
         rLED.value(1)
-    lcd.clear()
+
     lcd.message(message)
     ut.sleep(3)
     lcd.clear()
