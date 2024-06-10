@@ -2,8 +2,10 @@ import machine as mn
 import utime as ut
 
 
-led = mn.Pin(10, mn.Pin.OUT)
+red = mn.Pin(16, mn.Pin.OUT)
 
-led.high()
-ut.sleep(2)
-led.low()
+while True:
+    red.high()
+    ut.sleep(1)
+    red.low()
+    ut.sleep(1)
