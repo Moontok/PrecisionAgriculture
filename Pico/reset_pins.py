@@ -5,7 +5,7 @@ import machine as mn
 
 def reset_pins():
     for i in range(29):
-        pin = mn.Pin(i, mn.Pin.IN)
+        pin = mn.Pin(i, mn.Pin.OUT)
         pin.low()
 
 
