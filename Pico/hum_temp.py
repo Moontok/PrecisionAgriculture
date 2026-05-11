@@ -7,9 +7,9 @@ sensor = dht.DHT11(pin)
 
 while True:
     sensor.measure()
-    temp = sensor.temperature()
+    temp = sensor.temperature
     f_temp = temp * 9/5 + 32
-    hum = sensor.humidity()
+    hum = sensor.humidity
 
     print("Temperature:", f_temp, "F")
     print("Humidity:", hum, "%")
