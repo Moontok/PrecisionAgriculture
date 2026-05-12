@@ -8,7 +8,9 @@ from lcd1602 import LCD
 search_id = "270BD233" # Tag ID to search for
 
 reader = SimpleMFRC522(0, 18, 19, 16, 17, 9)
-lcd = LCD()
+
+i2c = m.I2C(0, sda=m.Pin(4), scl=m.Pin(5), freq=400000)
+lcd = LCD(i2c)
 
 while True:
     lcd.message("Scan Animal Tag")
