@@ -2,7 +2,7 @@ import machine as mn
 import utime as ut
 
 
-red = mn.Pin(16, mn.Pin.OUT)
+red = mn.Pin(13, mn.Pin.OUT)
 
 while True:
     red.high()
