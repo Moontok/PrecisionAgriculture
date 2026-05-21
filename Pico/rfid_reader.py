@@ -7,7 +7,7 @@ def read():
     id, text = reader.read()
     return id, text
 
-reader = SimpleMFRC522(0, 18, 19, 16, 17, 9)
+reader = SimpleMFRC522(0, 18, 16, 19, 17, 9)
 
 while True:
     info = read()

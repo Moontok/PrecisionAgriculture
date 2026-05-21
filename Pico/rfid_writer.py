@@ -1,6 +1,6 @@
 from mfrc522 import SimpleMFRC522
 
-reader = SimpleMFRC522(0, 18, 19, 16, 17, 9)
+reader = SimpleMFRC522(0, 18, 16, 19, 17, 9)
 
 def write():
     information = "Bubba"

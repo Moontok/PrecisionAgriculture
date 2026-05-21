@@ -7,9 +7,11 @@ from lcd1602 import LCD
 
 search_id = "270BD233" # Tag ID to search for
 
-reader = SimpleMFRC522(0, 18, 19, 16, 17, 9)
+reader = SimpleMFRC522(0, 18, 16, 19, 17, 9)
 
-i2c = m.I2C(0, sda=m.Pin(4), scl=m.Pin(5), freq=400000)
+sda = m.Pin(4)
+scl = m.Pin(5)
+i2c = m.I2C(0, sda=sda, scl=scl, freq=400000)
 lcd = LCD(i2c)
 
 while True:
@@ -21,7 +23,7 @@ while True:
     if tag_id == search_id:
         message = "Match: " + str(tag_name)
     else:
-        message = "No Match: " + str(tag_name)
+        message = "No Match: " + str(tag_name) + "\n" + tag_id
 
     lcd.message(message)
     ut.sleep(3)
