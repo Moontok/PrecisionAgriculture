@@ -1,0 +1,166 @@
+SUGGESTED UPDATES FOR remote_sensing.py
+High School Precision Agriculture Training
+=========================================
+
+OVERVIEW
+--------
+The file is a solid starting point, but several bugs, confusing naming choices, and missed
+teaching opportunities exist. Changes are grouped by priority below.
+
+
+----------------------------------------------------------
+1. BUG FIXES (must fix — these produce wrong output/errors)
+----------------------------------------------------------
+
+B) Variable name shadowing in plot_gndvi, plot_ndmi, and plot_ndwi
+   - The function parameters share the same names as the rasterio context manager
+     variables (e.g., 'green_band' and 'nir_band' are both the parameter name AND the
+     file-handle variable name). Python allows this but it is confusing for learners and
+     is a known source of bugs.
+   - Fix: rename the file-handle variables to something distinct:
+       with rasterio.open(green_band_path) as src_green:
+           green = src_green.read(1).astype(float)
+   - Also rename the function parameters to match:
+       def plot_gndvi(green_band_path, nir_band_path):
+
+C) RGB normalization is outside the green/blue context managers (lines 22-23)
+   - The 'rgb = rgb / rgb.max()' line sits inside the 'red_band' block but outside the
+     'green_band' and 'blue_band' blocks. It works because the data was already read into
+     numpy arrays, but the indentation is misleading and will confuse students reading
+     the code top-to-bottom.
+   - Fix: move 'rgb = rgb / rgb.max()' and the plt calls inside all three 'with' blocks,
+     OR flatten the nested 'with' statements into one line (Python 3 supports this):
+       with (rasterio.open(red_band_path) as src_r,
+             rasterio.open(green_band_path) as src_g,
+             rasterio.open(blue_band_path) as src_b):
+           red   = src_r.read(1).astype(float)
+           green = src_g.read(1).astype(float)
+           blue  = src_b.read(1).astype(float)
+           rgb   = np.dstack((red, green, blue))
+           rgb   = rgb / rgb.max()
+
+
+----------------------------------------------------------
+2. TEACHING IMPROVEMENTS (add to help students understand)
+----------------------------------------------------------
+
+A) Add a module-level docstring at the very top of the file
+   - Students need context before diving into functions. Example:
+
+       """
+       Remote Sensing with Landsat Imagery
+       =====================================
+       Landsat satellites capture reflected light from Earth's surface in several
+       'bands' — each band records a different wavelength of light.  By combining
+       or comparing bands mathematically, we can create Vegetation Indices (VIs)
+       that reveal information about crop health, water stress, and more.
+
+       Landsat 8/9 Band Reference (used in this script):
+           B2 (Blue)   - 0.45-0.51 µm
+           B3 (Green)  - 0.53-0.59 µm
+           B4 (Red)    - 0.64-0.67 µm
+           B5 (NIR)    - 0.85-0.88 µm  ← plants reflect NIR strongly when healthy
+           B6 (SWIR1)  - 1.57-1.65 µm  ← sensitive to water content in leaves/soil
+       """
+
+B) Add value-range interpretation comments inside each index function
+   - Students have no idea what a "good" NDVI number looks like. After each index
+     is calculated, add a comment block explaining the scale. Example for NDVI:
+
+       # NDVI value guide:
+       #   -1.0 to 0.0  → Water, bare soil, rock, or snow
+       #    0.0 to 0.2  → Sparse or stressed vegetation
+       #    0.2 to 0.5  → Moderate vegetation (pasture, shrubs)
+       #    0.5 to 1.0  → Dense, healthy vegetation (crops, forest)
+
+C) Handle division by zero for all index calculations
+   - When both bands equal zero (clouds, water, sensor errors), the formula produces
+     NaN (Not a Number) or infinity. This is a great teaching moment about real-world
+     data quality. Wrap each calculation using np.where:
+
+       ndvi = np.where(
+           (nir + red) == 0,   # condition: avoid dividing by zero
+           0,                  # value when condition is true
+           (nir - red) / (nir + red)  # normal calculation
+       )
+   - Then explain to students: "Real satellite data is messy — always check your
+     denominators!"
+
+D) Fix the plot_gndvi docstring — it says the wrong thing
+   - Line 50 says GNDVI "minimizes soil brightness influences" — that description
+     belongs to SAVI (Soil-Adjusted Vegetation Index).
+   - GNDVI's real advantage: it uses the green band instead of red, making it more
+     sensitive to chlorophyll concentration and better in dense canopies where the
+     red band saturates.
+   - Suggested replacement text:
+       "GNDVI is more sensitive to chlorophyll concentration than NDVI.
+        It performs better in dense crop canopies where the red band can saturate.
+        Useful for detecting subtle stress in mature corn or soybean fields."
+
+E) Add a better RGB stretch with percentile clipping
+   - The current 'rgb / rgb.max()' stretches the image to the single brightest pixel,
+     which often makes the whole image look dark if one pixel is very bright (clouds).
+   - Teach students about percentile stretching:
+
+       # Clip to 2nd–98th percentile so bright clouds don't wash out the image
+       p2, p98 = np.percentile(rgb, (2, 98))
+       rgb_clipped = np.clip(rgb, p2, p98)
+       rgb_display = (rgb_clipped - p2) / (p98 - p2)
+
+F) Add an 'if __name__ == "__main__":' block
+   - Move the band path variables and function calls (lines 106-116) into a main block.
+   - This is a standard Python pattern and teaches students the difference between a
+     script and a module. It also allows the file to be imported without auto-running:
+
+       if __name__ == "__main__":
+           blue_band_path  = "may_data/B2.TIF"
+           green_band_path = "may_data/B3.TIF"
+           red_band_path   = "may_data/B4.TIF"
+           nir_band_path   = "may_data/B5.TIF"
+           swir1_band_path = "may_data/B6.TIF"
+
+           # Uncomment the line(s) you want to run:
+           # plot_rgb(red_band_path, green_band_path, blue_band_path)
+           # plot_ndvi(red_band_path, nir_band_path)
+           # plot_gndvi(green_band_path, nir_band_path)
+           # plot_ndmi(swir1_band_path, nir_band_path)
+           plot_ndwi(green_band_path, nir_band_path)
+
+G) Rename band path variables to include '_path' suffix
+   - At the module level, 'green_band' means a file path (a string), but inside the
+     functions 'green_band' means rasterio data. Adding '_path' to the module-level
+     variables (green_band_path, nir_band_path, etc.) makes the distinction clear and
+     matches the naming inside the functions.
+
+
+----------------------------------------------------------
+3. OPTIONAL ENHANCEMENTS (stretch goals / advanced students)
+----------------------------------------------------------
+
+A) Add a save_figure parameter to each function
+   - Let students optionally save the output as a PNG for reports:
+       def plot_ndvi(red_band_path, nir_band_path, save_as=None):
+           ...
+           if save_as:
+               plt.savefig(save_as, dpi=150, bbox_inches='tight')
+           plt.show()
+
+B) Add a print statement showing basic stats after each calculation
+   - Helps students connect the formula to actual numbers:
+       print(f"NDVI range: {ndvi.min():.2f} to {ndvi.max():.2f}")
+       print(f"Mean NDVI: {np.nanmean(ndvi):.2f}")
+
+C) Consider combining all five plots into a single summary figure
+   - Using plt.subplot(2, 3, n) students could see RGB, NDVI, GNDVI, NDMI, and NDWI
+     side-by-side in one window — making it easier to compare what each index reveals.
+
+
+----------------------------------------------------------
+SUMMARY OF BUGS TO FIX IMMEDIATELY
+----------------------------------------------------------
+  Line 80: rename 'msi' → 'ndmi'
+  Line 82: label 'NDWI' → 'NDMI'
+  Line 83: title 'NDWI' → 'NDMI'
+  Lines 57-58, 76-77, 95-96: rename context manager variables to avoid shadowing params
+  Lines 22-23: fix indentation of rgb normalization (move inside all three with blocks)
+  Line 50: fix GNDVI docstring description

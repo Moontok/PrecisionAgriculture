@@ -77,10 +77,10 @@ def plot_ndmi(swir1_band, nir_band):
         with rasterio.open(swir1_band) as swir1_band:
             nir = nir_band.read(1).astype(float)
             swir1 = swir1_band.read(1).astype(float)
-            msi = (nir - swir1) / (nir + swir1)
-    plt.imshow(msi, cmap='RdYlGn')
-    plt.colorbar(label='NDWI')
-    plt.title('NDWI from Landsat Imagery')
+            ndmi = (nir - swir1) / (nir + swir1)
+    plt.imshow(ndmi, cmap='RdYlGn')
+    plt.colorbar(label='NDMI')
+    plt.title('NDMI from Landsat Imagery')
     plt.show()
 
 
