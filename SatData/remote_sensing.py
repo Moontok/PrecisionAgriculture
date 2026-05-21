@@ -45,7 +45,7 @@ def plot_ndvi(red_band_path, nir_band_path):
     plt.show()
 
 
-def plot_gndvi(green_band, nir_band):
+def plot_gndvi(green_band_path, nir_band_path):
     """GNDVI (Green Normalized Difference Vegetation Index):
     This is a vegetation index that minimizes soil brightness influences.
     It is particularly useful in areas with high soil brightness.
@@ -54,10 +54,10 @@ def plot_gndvi(green_band, nir_band):
     GNDVI = (NIR - Green) / (NIR + Green)
     """
 
-    with rasterio.open(green_band) as green_band:
-        with rasterio.open(nir_band) as nir_band:
-            green = green_band.read(1).astype(float)
-            nir = nir_band.read(1).astype(float)
+    with rasterio.open(green_band_path) as green_band_path:
+        with rasterio.open(nir_band_path) as nir_band_path:
+            green = green_band_path.read(1).astype(float)
+            nir = nir_band_path.read(1).astype(float)
             gndvi = (nir - green) / (nir + green)
     plt.imshow(gndvi, cmap='RdYlGn')
     plt.colorbar(label='Green Normalized Difference Vegetation Index (GNDVI)')
@@ -65,7 +65,7 @@ def plot_gndvi(green_band, nir_band):
     plt.show()
 
 
-def plot_ndmi(swir1_band, nir_band):
+def plot_ndmi(swir1_band_path, nir_band_path):
     """NDMI (Normalized Difference Moisture Index):
     This is a vegetation index that is sensitive to moisture content.
     It compares the near-infrared (NIR) and shortwave infrared (SWIR) bands.
@@ -73,10 +73,10 @@ def plot_ndmi(swir1_band, nir_band):
     NDMI = (NIR - SWIR1) / (NIR + SWIR1)
     """
 
-    with rasterio.open(nir_band) as nir_band:
-        with rasterio.open(swir1_band) as swir1_band:
-            nir = nir_band.read(1).astype(float)
-            swir1 = swir1_band.read(1).astype(float)
+    with rasterio.open(nir_band_path) as nir_band_path:
+        with rasterio.open(swir1_band_path) as swir1_band_path:
+            nir = nir_band_path.read(1).astype(float)
+            swir1 = swir1_band_path.read(1).astype(float)
             ndmi = (nir - swir1) / (nir + swir1)
     plt.imshow(ndmi, cmap='RdYlGn')
     plt.colorbar(label='NDMI')
