@@ -2,9 +2,9 @@ import machine as mn
 import utime as ut
 
 
-red = mn.Pin(13, mn.Pin.OUT)
-yellow = mn.Pin(14, mn.Pin.OUT)
-green = mn.Pin(15, mn.Pin.OUT)
+red = mn.Pin(17, mn.Pin.OUT)
+yellow = mn.Pin(19, mn.Pin.OUT)
+green = mn.Pin(20, mn.Pin.OUT)
 
 while True:
     red.high()
